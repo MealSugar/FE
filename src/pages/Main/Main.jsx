@@ -1,21 +1,14 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import { DashBoard } from '../../components/Dashboard'
 import { BiSolidPlusCircle } from "react-icons/bi";
+import CustomDietModal from './CustomDietModal';
+import getMain from '../../APIs/get/getMain';
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
-
-  .Greeting{
-    padding-bottom: 16px;
-  }
-  .FoodTitle{
-    padding: 34px 0px 16px 33px;
-    align-self: flex-start;
-  }
 `
 
 const Greeting = styled.text`
@@ -27,19 +20,20 @@ const Greeting = styled.text`
   line-height: normal;
   margin-bottom: 16px;
 `
-const FoodTitle = styled.text`
+const FoodTitle = styled.div`
   color: #000;
   font-family: "Wavve PADO TTF";
   font-size: 30px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  align-self: flex-start;
+  margin: 34px 0px 16px 33px;
 `
 const FoodContainer = styled.div`
   width: 350px;
   height: 300px;
-  flex-shrink: 0;
-  border: 2px dashed var(--Main, #6A0DAD);
+  border: 2px dashed #6A0DAD;
   background: #FFF;
   margin: 0px 20px 59px 20px;
   display: flex; 
@@ -49,12 +43,12 @@ const FoodContainer = styled.div`
 const Icon = styled(BiSolidPlusCircle)`
   width: 100px;
   height: 100px;
-  flex-shrink: 0;
   fill: #6A0DAD;
   justify-content: center;
+  cursor: pointer;
 `
 
-function Main() {
+export default function Main() {
 
   const [FoodModal, setFoodModal] = useState(false);
 
@@ -66,22 +60,34 @@ function Main() {
     setFoodModal(false); 
   };
 
+
+  const [nickname, setNickname] = useState('닉네임');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+
+        const response = await getMain();
+        setNickname(response.nickname);
+
+        console.log("닉네임: ", response.nickname);
+
+      } catch (error) {
+        console.error('message:', error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
   return (
     <Container>
-      <div className='Greeting'>
-        <Greeting>오늘도 반가워요, 승민님</Greeting>
-      </div>
-      <div className='DashBoardContainer'>
-        <DashBoard/>
-      </div>
-      <div className='FoodTitle'>
-        <FoodTitle>오늘의 추천식단</FoodTitle> 
-      </div>
-      <div className='FoodContainer'>
-        <FoodContainer><Icon onClick={IconClick}/></FoodContainer>
-      </div>
+      <Greeting>오늘도 반가워요, {nickname}님</Greeting>
+      <DashBoard/>
+      <FoodTitle>오늘의 추천식단</FoodTitle> 
+      <FoodContainer><Icon onClick={IconClick}/></FoodContainer>
+      {FoodModal && <CustomDietModal isOpen={IconClick} onClose={CloseModal}/>}
     </Container>
   )
 }
-
-export default Main
