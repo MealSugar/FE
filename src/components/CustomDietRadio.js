@@ -40,7 +40,7 @@ const CustomRadio = ({ value, checked, onChange, label }) => {
       <RadioLabel>
         <RadioInput
           type="radio"
-          name="mealType"
+          name="diet_combination"
           value={value}
           checked={checked}
           onChange={onChange}/>
