@@ -6,6 +6,8 @@ import { FoodRecommendBack } from '../../components/FoodRecommendBack';
 import { IoIosArrowRoundForward } from "react-icons/io";
 import getMain from '../../APIs/get/getMain';
 import patchMainHeart from '../../APIs/patch/patchMainHeart';
+import postFoodRecommend from '../../APIs/post/postFoodRecommend';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -57,12 +59,14 @@ const RecommendButton = styled.div`
 `;
 
 function AfterMain() {
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [userData, setUserData] = useState({
     recommendCount: 0,
     dietSets: []
   });
   const [currentDietSetId, setCurrentDietSetId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -104,14 +108,38 @@ function AfterMain() {
       alert('식단 추천은 세 번까지 받을 수 있습니다.');
       return;
     }
+    setIsLoading(true);
+
     try {
+      // 기본 요청 데이터 (필요에 따라 조정 가능)
+      const requestData = {
+        diet_combination: '식사3',
+        breakfast: '한식',
+        lunch: '한식',
+        dinner: '한식',
+        ingredient1: '',
+        ingredient2: '',
+        ingredient3: '',
+      };
+
+      // 식단 추천 API 호출
+      const response = await postFoodRecommend(requestData);
+      console.log('추천 응답:', response);
+
+      // 추천 후 업데이트된 데이터 가져오기
       const updatedData = await fetchUserData();
       if (updatedData.diet_sets.length > 0) {
         setCurrentDietSetId(updatedData.diet_sets[0].diet_set_id);
       }
-      console.log('Updated Data after recommendation:', updatedData);
+      console.log('추천 후 업데이트된 데이터:', updatedData);
+
+      // 필요한 경우 다른 페이지로 이동하거나 UI 업데이트
+      // navigate('/some-path');
     } catch (error) {
-      console.error('AfterMain 내 getMain에서 에러 발생:', error);
+      console.error('추천 중 오류 발생:', error);
+      alert('식단 추천 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -138,8 +166,8 @@ function AfterMain() {
       </FoodTitle>
       <RecommendButton
         onClick={handleRecommendClick}
-        disabled={userData.recommendCount >= 3}>
-        다시 추천받기<IoIosArrowRoundForward />
+        disabled={userData.recommendCount >= 3 || isLoading}>
+        {isLoading ? '추천 중...' : '다시 추천받기'}<IoIosArrowRoundForward />
       </RecommendButton>
       <FoodRecommendBack 
         currentDietSetId={currentDietSetId}
