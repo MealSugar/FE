@@ -230,7 +230,7 @@ const Mobile = () => {
                             className={classNames({
                                 hidden: !showLogo,
                             })}
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/main')}
                         />
                     </Header>
                     <Outlet />
